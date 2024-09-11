@@ -15,19 +15,18 @@ const Topbar = () => {
   const navigate = useNavigate();
 
   const handleSearch = (event) => {
-    setSearchTerm(event.target.value); // Update search term on every change
+    setSearchTerm(event.target.value); 
   };
 
   const searchUser = async () => {
     if (!searchTerm.trim()) {
       toast("Please enter a valid username");
-      return; // Skip API call if search term is empty or just spaces
+      return; 
     }
     try {
       const res = await axiosInstance.get(`/users?username=${searchTerm}`);
       setFriendsList(res.data);
 
-      // Navigate to profile if user is found
       if (res.data?.username) {
         navigate(`/profile/${res.data.username}`);
       } else {
@@ -56,7 +55,7 @@ const Topbar = () => {
             onChange={handleSearch}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
-                searchUser(); // Trigger search when "Enter" key is pressed
+                searchUser(); 
               }
             }}
           />
