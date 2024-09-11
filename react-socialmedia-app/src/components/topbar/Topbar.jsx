@@ -5,29 +5,39 @@ import ChatBubbleRoundedIcon from "@mui/icons-material/ChatBubbleRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import { Link, useNavigate } from "react-router-dom";
 import BasicMenu from "../Basicmenu";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { axiosInstance } from "../../config";
 
 const Topbar = () => {
-  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [friendsList, setFriendsList] = useState();
   const navigate = useNavigate();
+
   const handleSearch = (event) => {
-    event.preventDefault();
-    setSearchTerm(event.target.value);
+    setSearchTerm(event.target.value); // Update search term on every change
   };
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await axiosInstance.get(`/users?username=${searchTerm}`);
-        setFriendsList(res.data);
-      } catch (err) {
-        console.log(err);
+
+  const searchUser = async () => {
+    if (!searchTerm.trim()) {
+      toast("Please enter a valid username");
+      return; // Skip API call if search term is empty or just spaces
+    }
+    try {
+      const res = await axiosInstance.get(`/users?username=${searchTerm}`);
+      setFriendsList(res.data);
+
+      // Navigate to profile if user is found
+      if (res.data?.username) {
+        navigate(`/profile/${res.data.username}`);
+      } else {
+        toast("Username Not Found");
       }
-    };
-    getUser();
-  }, [searchTerm]);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="topbarContainer">
       <div className="topbarLeft">
@@ -42,15 +52,11 @@ const Topbar = () => {
             type="text"
             placeholder="Search for friend, post or video"
             className="searchInput"
+            value={searchTerm}
             onChange={handleSearch}
             onKeyDown={(event) => {
-              console.log(friendsList?.username);
               if (event.key === "Enter") {
-                if (friendsList?.username)
-                  navigate(`/profile/${friendsList?.username}`);
-                else {
-                  toast("Username Not Found");
-                }
+                searchUser(); // Trigger search when "Enter" key is pressed
               }
             }}
           />
@@ -82,18 +88,7 @@ const Topbar = () => {
             <span className="topbarIconBadge">1</span>
           </div>
         </div>
-        {/* <Link to={`/profile/${user.username}`}> */}
         <BasicMenu />
-        {/* <img
-            src={
-              user.profilePicture
-                ? PF + `person/${user.profilePicture}`
-                : PF + "person/noAvtar.png"
-            }
-            alt=""
-            className="topbarImg"
-          /> */}
-        {/* </Link> */}
       </div>
     </div>
   );
